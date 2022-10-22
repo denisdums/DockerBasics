@@ -1,0 +1,36 @@
+FROM php:8.0-apache
+
+USER root
+
+RUN echo "UTC+2" > /etc/timezone
+
+#Installs
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y wget git zip nano
+RUN docker-php-ext-install mysqli
+
+#WP Cli
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && \
+    mv wp-cli.phar /usr/local/bin/wp
+
+#Composer
+COPY ./tools/install-composer.sh /docker/install-composer.sh
+RUN sh /docker/install-composer.sh && \
+    composer self-update --2.2
+
+#Apache
+RUN echo 'ServerName ${APP_TD}.docker' >> /etc/apache2/apache2.conf
+
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 3. mod_rewrite for URL rewrite and mod_headers for .htaccess extra headers like Access-Control-Allow-Origin-
+RUN a2enmod rewrite headers
+
+#RIGHTS
+RUN usermod -u 1000 www-data
+
+USER www-data
+
+EXPOSE 80
