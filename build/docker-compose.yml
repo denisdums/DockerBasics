@@ -39,8 +39,8 @@ services:
     environment:
       PMA_ARBITRARY: 1
       PMA_HOST: db
-      PMA_USER: pma
-      PMA_PASSWORD: pma
+      PMA_USER: database
+      PMA_PASSWORD: database
       UPLOAD_LIMIT: 20M
     ports:
       - 8899:80
