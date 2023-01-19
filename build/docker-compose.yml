@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.0}
     container_name: "${APP_TD}-php"
     depends_on:
       - db
